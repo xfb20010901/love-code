@@ -1,6 +1,13 @@
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('.container').innerHTML += '<div class="hint">双击屏幕开始</div>';
+});
+
 document.addEventListener('dblclick', () => {
+    document.querySelector('.hint')?.remove();
     if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error: ${err.message}`);
+        });
     }
     showPetals();
     document.querySelector('.message').style.opacity = '1';
