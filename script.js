@@ -11,27 +11,31 @@ document.addEventListener('DOMContentLoaded', () => {
     musicControl.innerHTML = '🔇';
     document.body.appendChild(musicControl);
     
-    audio = document.createElement('audio');
+    audio = new Audio('background-music.mp3');
     audio.id = 'bgMusic';
     audio.loop = true;
-    audio.preload = 'auto';
-    audio.innerHTML = `
-        <source src="background-music.mp3" type="audio/mpeg">
-        <source src="background-music.ogg" type="audio/ogg">
-        <source src="background-music.wav" type="audio/wav">
-    `;
-    document.body.appendChild(audio);
     
+    // 监听音频加载状态
     audio.addEventListener('loadeddata', () => {
-        console.log('音频已加载完成');
+        console.log('音频加载完成');
+        musicControl.style.opacity = '1'; // 显示控制按钮
+    });
+    
+    audio.addEventListener('playing', () => {
+        console.log('音频开始播放');
+        isMusicPlaying = true;
+        musicControl.innerHTML = '🔊';
+    });
+    
+    audio.addEventListener('pause', () => {
+        console.log('音频暂停');
+        isMusicPlaying = false;
+        musicControl.innerHTML = '🔇';
     });
     
     audio.addEventListener('error', (e) => {
-        console.error('音频加载失败:', e);
-    });
-    
-    audio.addEventListener('canplaythrough', () => {
-        console.log('音频已缓冲完成，可以播放');
+        console.error('音频错误:', e);
+        alert('音频加载失败，请刷新页面重试');
     });
     
     // 音乐控制按钮点击事件
@@ -40,13 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (isMusicPlaying) {
                 audio.pause();
-                musicControl.innerHTML = '🔇';
-                isMusicPlaying = false;
             } else {
-                await playAudio();
+                await audio.play();
             }
         } catch (err) {
             console.error('音乐控制失败:', err);
+            musicControl.style.animation = 'shake 0.5s ease-in-out';
         }
     });
     
@@ -250,6 +253,19 @@ document.addEventListener('DOMContentLoaded', () => {
     addLoveDaysCounter();
     
     createPhotoWall();
+    
+    // 监听用户首次交互
+    const handleFirstInteraction = () => {
+        playAudio().catch(() => {
+            console.log('首次播放尝试失败');
+        });
+        // 移除首次交互监听
+        document.removeEventListener('click', handleFirstInteraction);
+        document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+    
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
 });
 
 function showPetals() {
@@ -273,34 +289,34 @@ function showPetals() {
 
 async function playAudio() {
     try {
-        if (!audio || !musicControl) {
-            console.error('Audio elements not initialized');
-            return;
-        }
+        if (!audio) return;
         
-        // 用户交互后再播放
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                isMusicPlaying = true;
-                musicControl.innerHTML = '🔊';
-                console.log('音频播放成功');
-            }).catch(error => {
-                console.error('播放失败:', error);
-                // 如果是自动播放策略导致的失败，提示用户点击播放
-                if (error.name === 'NotAllowedError') {
-                    alert('请点击页面任意位置来播放音乐');
-                }
-                throw error;
+        // 检查音频是否已加载
+        if (audio.readyState < 2) {
+            console.log('等待音频加载...');
+            await new Promise((resolve, reject) => {
+                audio.addEventListener('canplay', resolve, {once: true});
+                audio.addEventListener('error', reject, {once: true});
+                // 5秒超时
+                setTimeout(reject, 5000);
             });
         }
         
+        // 尝试播放
+        if (!isMusicPlaying) {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                await playPromise;
+                console.log('播放成功');
+            }
+        }
     } catch (err) {
-        console.error('音频播放失败:', err);
-        if (musicControl) {
+        console.error('播放失败:', err);
+        if (err.name === 'NotAllowedError') {
+            console.log('需要用户交互才能播放');
+            // 不显示弹窗，只显示音乐控制按钮的动画效果
             musicControl.style.animation = 'shake 0.5s ease-in-out';
         }
-        throw err;
     }
 }
 
