@@ -275,34 +275,27 @@ async function playAudio() {
             return;
         }
         
-        if (!audio.readyState >= 2) {
-            await new Promise((resolve, reject) => {
-                audio.addEventListener('canplaythrough', resolve, {once: true});
-                audio.addEventListener('error', reject, {once: true});
-                
-                // 添加超时处理
-                setTimeout(() => {
-                    reject(new Error('Audio loading timeout'));
-                }, 5000);
-            });
+        // 检查音频文件是否存在
+        const response = await fetch('background-music.mp3');
+        if (!response.ok) {
+            throw new Error('音频文件不存在');
         }
         
-        await audio.play();
-        isMusicPlaying = true;
-        musicControl.innerHTML = '🔊';
-        
-        // 添加音频状态日志
-        console.log('Audio playing successfully');
-        console.log('Audio current time:', audio.currentTime);
-        console.log('Audio duration:', audio.duration);
-        console.log('Audio ready state:', audio.readyState);
+        // 尝试播放
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            await playPromise;
+            isMusicPlaying = true;
+            musicControl.innerHTML = '🔊';
+            console.log('音频播放成功');
+        }
         
     } catch (err) {
         console.error('音频播放失败:', err);
         if (musicControl) {
             musicControl.style.animation = 'shake 0.5s ease-in-out';
         }
-        throw err; // 重新抛出错误以便调用者处理
+        throw err;
     }
 }
 
