@@ -168,10 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.message').classList.add('message-animation');
         
         // 尝试播放音乐
-        audio.play().then(() => {
-            isMusicPlaying = true;
-            musicControl.innerHTML = '🔊';
-        }).catch(err => {
+        playAudio().catch(err => {
             console.log('需要用户手动点击播放音乐:', err);
             musicControl.style.animation = 'shake 0.5s ease-in-out';
         });
@@ -190,6 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const randomMessage = loveMessages[Math.floor(Math.random() * loveMessages.length)];
             typeWriter(message, randomMessage, 100);
         }, 5000);
+        
+        // 显示照片墙
+        const photoWall = document.querySelector('.photo-wall');
+        if (photoWall) {
+            photoWall.style.display = 'flex';
+        } else {
+            createPhotoWall();
+        }
         
         // 移除事件监听
         document.removeEventListener('click', startExperience);
@@ -279,23 +284,22 @@ async function playAudio() {
 }
 
 function createPhotoWall() {
+    console.log('Creating photo wall...');
     const memories = [
         { date: '2024-01-01', text: '我们的第一次见面', image: 'images/memory1.jpg' },
-        { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' },
-        { date: '2024-03-01', text: '一起看日落', image: 'images/memory3.jpg' },
-        { date: '2024-03-14', text: '第一次一起旅行', image: 'images/memory4.jpg' },
-        { date: '2024-03-21', text: '和你一起看樱花', image: 'images/memory5.jpg' }
+        { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' }
     ];
     
     const wall = document.createElement('div');
     wall.className = 'photo-wall';
     
     memories.forEach(memory => {
+        console.log('Adding memory:', memory);
         const card = document.createElement('div');
         card.className = 'memory-card';
         card.innerHTML = `
             <img src="${memory.image}" alt="${memory.text}" 
-                 onerror="this.src='images/default.jpg';this.onerror=null;">
+                 onerror="console.error('Failed to load image:', this.src);this.src='images/default.jpg';this.onerror=null;">
             <div class="memory-text">
                 <div class="memory-date">${memory.date}</div>
                 <div class="memory-description">${memory.text}</div>
@@ -305,4 +309,5 @@ function createPhotoWall() {
     });
     
     document.body.appendChild(wall);
+    console.log('Photo wall created');
 } 
