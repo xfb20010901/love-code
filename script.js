@@ -280,9 +280,11 @@ async function playAudio() {
 
 function createPhotoWall() {
     const memories = [
-        { date: '2024-01-01', text: '我们的第一次见面', image: 'path/to/image1.jpg' },
-        { date: '2024-02-14', text: '第一个情人节', image: 'path/to/image2.jpg' },
-        // 添加更多美好回忆
+        { date: '2024-01-01', text: '我们的第一次见面', image: 'images/memory1.jpg' },
+        { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' },
+        { date: '2024-03-01', text: '一起看日落', image: 'images/memory3.jpg' },
+        { date: '2024-03-14', text: '第一次一起旅行', image: 'images/memory4.jpg' },
+        { date: '2024-03-21', text: '和你一起看樱花', image: 'images/memory5.jpg' }
     ];
     
     const wall = document.createElement('div');
@@ -292,7 +294,8 @@ function createPhotoWall() {
         const card = document.createElement('div');
         card.className = 'memory-card';
         card.innerHTML = `
-            <img src="${memory.image}" alt="${memory.text}">
+            <img src="${memory.image}" alt="${memory.text}" 
+                 onerror="this.src='images/default.jpg';this.onerror=null;">
             <div class="memory-text">
                 <div class="memory-date">${memory.date}</div>
                 <div class="memory-description">${memory.text}</div>
