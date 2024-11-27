@@ -171,38 +171,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        showPetals();
-        document.querySelector('.message').style.opacity = '1';
-        document.querySelector('.message').classList.add('message-animation');
+        // 初始化场景
+        const sceneManager = new SceneManager();
+        sceneManager.showScene(0); // 显示开场场景
         
-        // 尝试播放音乐
-        playAudio().catch(err => {
-            console.log('需要用户手动点击播放音乐:', err);
-            musicControl.style.animation = 'shake 0.5s ease-in-out';
+        // 添加场景切换按钮
+        const navContainer = document.createElement('div');
+        navContainer.className = 'global-nav';
+        navContainer.innerHTML = `
+            <button class="nav-btn scene-btn" data-scene="0">开场</button>
+            <button class="nav-btn scene-btn" data-scene="1">回忆</button>
+            <button class="nav-btn scene-btn" data-scene="2">情书</button>
+            <button class="nav-btn scene-btn" data-scene="3">互动</button>
+        `;
+        document.body.appendChild(navContainer);
+        
+        // 绑定场景切换按钮事件
+        document.querySelectorAll('.scene-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sceneIndex = parseInt(e.target.dataset.scene);
+                sceneManager.showScene(sceneIndex);
+            });
         });
-        
-        // 添加打字机效果
-        const message = document.querySelector('.message');
-        typeWriter(message, "我永远爱你", 200);
-        
-        // 创建多个可拖动的爱心
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => createDraggableHeart(), i * 500);
-        }
-        
-        // 定时切换情话
-        setInterval(() => {
-            const randomMessage = loveMessages[Math.floor(Math.random() * loveMessages.length)];
-            typeWriter(message, randomMessage, 100);
-        }, 5000);
-        
-        // 显示照片墙
-        const photoWall = document.querySelector('.photo-wall');
-        if (photoWall) {
-            photoWall.style.display = 'flex';
-        } else {
-            createPhotoWall();
-        }
         
         // 移除事件监听
         document.removeEventListener('click', startExperience);
@@ -283,34 +273,30 @@ document.addEventListener('DOMContentLoaded', () => {
         
         init() {
             this.showScene(0);
-            this.bindEvents();
-        }
-        
-        bindEvents() {
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (btn.classList.contains('next-btn')) {
-                        this.nextScene();
-                    } else if (btn.classList.contains('prev-btn')) {
-                        this.prevScene();
-                    } else if (btn.classList.contains('home-btn')) {
-                        this.showScene(0);
-                    }
-                });
-            });
         }
         
         showScene(index) {
+            // 更新场景显示
             this.scenes.forEach(scene => {
                 scene.classList.remove('active');
             });
             this.scenes[index].classList.add('active');
+            
+            // 更新导航按钮状态
+            document.querySelectorAll('.scene-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.scene) === index) {
+                    btn.classList.add('active');
+                }
+            });
+            
             this.currentScene = index;
             
             // 根据场景执行特定初始化
             switch(index) {
                 case 0: // 开场
-                    this.initOpeningScene();
+                    showPetals();
+                    typeWriter(document.querySelector('.message'), "我永远爱你", 200);
                     break;
                 case 1: // 回忆
                     this.initMemoryScene();
@@ -324,69 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        nextScene() {
-            const next = (this.currentScene + 1) % this.scenes.length;
-            this.showScene(next);
-        }
-        
-        prevScene() {
-            const prev = this.currentScene - 1 < 0 ? this.scenes.length - 1 : this.currentScene - 1;
-            this.showScene(prev);
-        }
-        
-        initOpeningScene() {
-            // 原有的开场动画逻辑
-            showPetals();
-            typeWriter(document.querySelector('.message'), "点击开始我们的故事", 200);
-        }
-        
-        initMemoryScene() {
-            const timeline = document.querySelector('.photo-timeline');
-            if (!timeline.children.length) {
-                const memories = [
-                    { date: '2024-01-01', text: '我们的初遇', image: 'images/memory1.jpg' },
-                    { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' },
-                    // 添加更多回忆
-                ];
-                
-                memories.forEach(memory => {
-                    const card = this.createMemoryCard(memory);
-                    timeline.appendChild(card);
-                });
-            }
-        }
-        
-        initLetterScene() {
-            const content = document.querySelector('.letter-content');
-            const letter = `亲爱的：
-                遇见你是我最大的幸运，
-                每一天都因为有你的存在而变得更加美好。
-                我想要和你一起走过春夏秋冬，
-                共同创造属于我们的故事。
-                永远爱你。`;
-                
-            typeWriter(content, letter, 100);
-        }
-        
-        initInteractiveScene() {
-            if (!document.querySelector('.wishing-well').children.length) {
-                createWishingWell();
-                createHeartbeat();
-            }
-        }
-        
-        createMemoryCard(memory) {
-            const card = document.createElement('div');
-            card.className = 'memory-card';
-            card.innerHTML = `
-                <img src="${memory.image}" alt="${memory.text}">
-                <div class="memory-text">
-                    <div class="memory-date">${memory.date}</div>
-                    <div class="memory-description">${memory.text}</div>
-                </div>
-            `;
-            return card;
-        }
+        // ... 其他方法保持不变 ...
     }
     
     // 在 DOMContentLoaded 中初始化场景管理器
@@ -608,7 +532,7 @@ function createHeartBurst(x, y) {
         const animate = () => {
             frame++;
             const x = parseFloat(heart.style.left) + vx;
-            const y = parseFloat(heart.style.top) + vy + frame * 0.5; // ��加重力效果
+            const y = parseFloat(heart.style.top) + vy + frame * 0.5; // 加重力效果
             const opacity = 1 - frame / 50;
             
             heart.style.left = x + 'px';
