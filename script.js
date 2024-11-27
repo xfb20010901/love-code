@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('音频加载失败:', e);
     });
     
+    audio.addEventListener('canplaythrough', () => {
+        console.log('音频已缓冲完成，可以播放');
+    });
+    
     let isMusicPlaying = false;
     
     // 音乐控制按钮点击事件
@@ -32,8 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await audio.pause();
                 musicControl.innerHTML = '🔇';
             } else {
-                await audio.play();
-                musicControl.innerHTML = '🔊';
+                await playAudio();
             }
             isMusicPlaying = !isMusicPlaying;
         } catch (err) {
@@ -122,6 +125,18 @@ document.addEventListener('DOMContentLoaded', () => {
             heart.style.animation = 'floating 3s ease-in-out infinite';
         }
         
+        function preventScroll(e) {
+            e.preventDefault();
+        }
+        
+        heart.addEventListener('touchstart', (e) => {
+            heart.addEventListener('touchmove', preventScroll, { passive: false });
+        });
+        
+        heart.addEventListener('touchend', () => {
+            heart.removeEventListener('touchmove', preventScroll);
+        });
+        
         document.body.appendChild(heart);
     }
     
@@ -195,10 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         setTimeout(() => ripple.remove(), 1000);
     });
+    
+    // 在DOMContentLoaded事件开始时添加
+    const petalsContainer = document.createElement('div');
+    petalsContainer.id = 'petals';
+    document.body.appendChild(petalsContainer);
 });
 
 function showPetals() {
     const petalsContainer = document.getElementById('petals');
+    // 确保容器是空的
+    petalsContainer.innerHTML = '';
     const petalCount = 100;
     const petalTypes = ['🌸', '🌺', '💮', '🏵️', '❤️'];
 
@@ -211,5 +233,22 @@ function showPetals() {
         petal.style.fontSize = (Math.random() * 20 + 10) + 'px';
         petal.style.opacity = Math.random() * 0.5 + 0.5;
         petalsContainer.appendChild(petal);
+    }
+}
+
+async function playAudio() {
+    try {
+        if (!audio.readyState >= 2) {
+            await new Promise((resolve, reject) => {
+                audio.addEventListener('canplaythrough', resolve, {once: true});
+                audio.addEventListener('error', reject, {once: true});
+            });
+        }
+        await audio.play();
+        isMusicPlaying = true;
+        musicControl.innerHTML = '🔊';
+    } catch (err) {
+        console.error('音频播放失败:', err);
+        musicControl.style.animation = 'shake 0.5s ease-in-out';
     }
 } 
