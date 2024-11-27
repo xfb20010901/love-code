@@ -1,41 +1,69 @@
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelector('.container').innerHTML += '<div class="hint">双击屏幕开始</div>';
+    document.querySelector('.container').innerHTML += '<div class="hint">点击屏幕开始</div>';
     const audio = document.createElement('audio');
     audio.id = 'bgMusic';
     audio.loop = true;
     audio.src = 'background-music.mp3';
     document.body.appendChild(audio);
     
-    // 添加点击爱心效果
+    // 统一处理点击/触摸事件
+    const startExperience = (e) => {
+        e.preventDefault(); // 阻止默认行为
+        document.querySelector('.hint')?.remove();
+        
+        // 尝试请求全屏
+        if (!document.fullscreenElement) {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen();
+            } else if (docElm.webkitRequestFullscreen) { // Safari
+                docElm.webkitRequestFullscreen();
+            } else if (docElm.mozRequestFullScreen) { // Firefox
+                docElm.mozRequestFullScreen();
+            } else if (docElm.msRequestFullscreen) { // IE/Edge
+                docElm.msRequestFullscreen();
+            }
+        }
+        
+        showPetals();
+        document.querySelector('.message').style.opacity = '1';
+        document.querySelector('.message').classList.add('message-animation');
+        
+        // 尝试播放音乐
+        const music = document.getElementById('bgMusic');
+        music.play().catch(err => console.log('无法自动播放音乐:', err));
+        
+        // 移除事件监听
+        document.removeEventListener('click', startExperience);
+        document.removeEventListener('touchstart', startExperience);
+    };
+
+    // 添加触摸和点击事件
+    document.addEventListener('click', startExperience);
+    document.addEventListener('touchstart', startExperience);
+    
+    // 处理爱心效果
+    const createHeartAtPoint = (x, y) => {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤️'; // 使用emoji替代CSS样式
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+    };
+
+    // 同时支持点击和触摸创建爱心
     document.addEventListener('click', (e) => {
-        createHeart(e.clientX, e.clientY);
+        createHeartAtPoint(e.clientX, e.clientY);
+    });
+    
+    document.addEventListener('touchstart', (e) => {
+        Array.from(e.touches).forEach(touch => {
+            createHeartAtPoint(touch.clientX, touch.clientY);
+        });
     });
 });
-
-document.addEventListener('dblclick', () => {
-    document.querySelector('.hint')?.remove();
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`Error: ${err.message}`);
-        });
-    }
-    showPetals();
-    document.querySelector('.message').style.opacity = '1';
-    document.querySelector('.message').classList.add('message-animation');
-    document.getElementById('bgMusic').play();
-});
-
-// 添加点击爱心效果函数
-function createHeart(x, y) {
-    const heart = document.createElement('div');
-    heart.className = 'heart';
-    heart.style.left = x + 'px';
-    heart.style.top = y + 'px';
-    document.body.appendChild(heart);
-    
-    // 动画结束后移除元素
-    setTimeout(() => heart.remove(), 1000);
-}
 
 function showPetals() {
     const petalsContainer = document.getElementById('petals');
@@ -51,14 +79,5 @@ function showPetals() {
         petal.style.fontSize = (Math.random() * 20 + 10) + 'px';
         petal.style.opacity = Math.random() * 0.5 + 0.5;
         petalsContainer.appendChild(petal);
-        
-        // 添加鼠标悬停效果
-        petal.addEventListener('mouseover', () => {
-            petal.style.transform = 'scale(1.5)';
-            petal.style.transition = 'transform 0.3s';
-        });
-        petal.addEventListener('mouseout', () => {
-            petal.style.transform = 'scale(1)';
-        });
     }
 } 
