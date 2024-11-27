@@ -10,22 +10,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const audio = document.createElement('audio');
     audio.id = 'bgMusic';
     audio.loop = true;
+    audio.preload = 'auto';
     audio.src = 'background-music.mp3';
     document.body.appendChild(audio);
+    
+    audio.addEventListener('loadeddata', () => {
+        console.log('音频已加载完成');
+    });
+    
+    audio.addEventListener('error', (e) => {
+        console.error('音频加载失败:', e);
+    });
     
     let isMusicPlaying = false;
     
     // 音乐控制按钮点击事件
-    musicControl.addEventListener('click', (e) => {
+    musicControl.addEventListener('click', async (e) => {
         e.stopPropagation();
-        if (isMusicPlaying) {
-            audio.pause();
-            musicControl.innerHTML = '🔇';
-        } else {
-            audio.play();
-            musicControl.innerHTML = '🔊';
+        try {
+            if (isMusicPlaying) {
+                await audio.pause();
+                musicControl.innerHTML = '🔇';
+            } else {
+                await audio.play();
+                musicControl.innerHTML = '🔊';
+            }
+            isMusicPlaying = !isMusicPlaying;
+        } catch (err) {
+            console.error('播放失败:', err);
+            alert('音乐播放失败，请检查音频文件');
         }
-        isMusicPlaying = !isMusicPlaying;
     });
     
     // 统一处理点击/触摸事件
