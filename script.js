@@ -272,6 +272,125 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 创建心跳动画
     createHeartbeat();
+    
+    // 场景管理类
+    class SceneManager {
+        constructor() {
+            this.scenes = document.querySelectorAll('.scene');
+            this.currentScene = 0;
+            this.init();
+        }
+        
+        init() {
+            this.showScene(0);
+            this.bindEvents();
+        }
+        
+        bindEvents() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (btn.classList.contains('next-btn')) {
+                        this.nextScene();
+                    } else if (btn.classList.contains('prev-btn')) {
+                        this.prevScene();
+                    } else if (btn.classList.contains('home-btn')) {
+                        this.showScene(0);
+                    }
+                });
+            });
+        }
+        
+        showScene(index) {
+            this.scenes.forEach(scene => {
+                scene.classList.remove('active');
+            });
+            this.scenes[index].classList.add('active');
+            this.currentScene = index;
+            
+            // 根据场景执行特定初始化
+            switch(index) {
+                case 0: // 开场
+                    this.initOpeningScene();
+                    break;
+                case 1: // 回忆
+                    this.initMemoryScene();
+                    break;
+                case 2: // 情书
+                    this.initLetterScene();
+                    break;
+                case 3: // 互动
+                    this.initInteractiveScene();
+                    break;
+            }
+        }
+        
+        nextScene() {
+            const next = (this.currentScene + 1) % this.scenes.length;
+            this.showScene(next);
+        }
+        
+        prevScene() {
+            const prev = this.currentScene - 1 < 0 ? this.scenes.length - 1 : this.currentScene - 1;
+            this.showScene(prev);
+        }
+        
+        initOpeningScene() {
+            // 原有的开场动画逻辑
+            showPetals();
+            typeWriter(document.querySelector('.message'), "点击开始我们的故事", 200);
+        }
+        
+        initMemoryScene() {
+            const timeline = document.querySelector('.photo-timeline');
+            if (!timeline.children.length) {
+                const memories = [
+                    { date: '2024-01-01', text: '我们的初遇', image: 'images/memory1.jpg' },
+                    { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' },
+                    // 添加更多回忆
+                ];
+                
+                memories.forEach(memory => {
+                    const card = this.createMemoryCard(memory);
+                    timeline.appendChild(card);
+                });
+            }
+        }
+        
+        initLetterScene() {
+            const content = document.querySelector('.letter-content');
+            const letter = `亲爱的：
+                遇见你是我最大的幸运，
+                每一天都因为有你的存在而变得更加美好。
+                我想要和你一起走过春夏秋冬，
+                共同创造属于我们的故事。
+                永远爱你。`;
+                
+            typeWriter(content, letter, 100);
+        }
+        
+        initInteractiveScene() {
+            if (!document.querySelector('.wishing-well').children.length) {
+                createWishingWell();
+                createHeartbeat();
+            }
+        }
+        
+        createMemoryCard(memory) {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.innerHTML = `
+                <img src="${memory.image}" alt="${memory.text}">
+                <div class="memory-text">
+                    <div class="memory-date">${memory.date}</div>
+                    <div class="memory-description">${memory.text}</div>
+                </div>
+            `;
+            return card;
+        }
+    }
+    
+    // 在 DOMContentLoaded 中初始化场景管理器
+    const sceneManager = new SceneManager();
 });
 
 function showPetals() {
@@ -489,7 +608,7 @@ function createHeartBurst(x, y) {
         const animate = () => {
             frame++;
             const x = parseFloat(heart.style.left) + vx;
-            const y = parseFloat(heart.style.top) + vy + frame * 0.5; // 添加重力效果
+            const y = parseFloat(heart.style.top) + vy + frame * 0.5; // ��加重力效果
             const opacity = 1 - frame / 50;
             
             heart.style.left = x + 'px';
