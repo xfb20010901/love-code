@@ -162,11 +162,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) {
                 docElm.requestFullscreen();
-            } else if (docElm.webkitRequestFullscreen) { // Safari
+            } else if (docElm.webkitRequestFullscreen) {
                 docElm.webkitRequestFullscreen();
-            } else if (docElm.mozRequestFullScreen) { // Firefox
+            } else if (docElm.mozRequestFullScreen) {
                 docElm.mozRequestFullScreen();
-            } else if (docElm.msRequestFullscreen) { // IE/Edge
+            } else if (docElm.msRequestFullscreen) {
                 docElm.msRequestFullscreen();
             }
         }
@@ -175,8 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.message').style.opacity = '1';
         document.querySelector('.message').classList.add('message-animation');
         
-        // 初始化场景
-        const sceneManager = new SceneManager();
+        // 创建四个角的心跳动画
+        createHeartbeat();
+        
+        // 创建多个可拖动的爱心
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => createDraggableHeart(), i * 500);
+        }
         
         // 添加场景切换按钮
         const navContainer = document.createElement('div');
@@ -189,8 +194,29 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.body.appendChild(navContainer);
         
-        // 显示第一个场景
-        sceneManager.showScene(0);
+        // 绑定场景切换按钮事件
+        document.querySelectorAll('.scene-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const sceneIndex = parseInt(e.target.dataset.scene);
+                sceneManager.showScene(sceneIndex);
+            });
+        });
+        
+        // 尝试播放音乐
+        playAudio().catch(err => {
+            console.log('需要用户手动点击播放音乐:', err);
+            musicControl.style.animation = 'shake 0.5s ease-in-out';
+        });
+        
+        // 添加打字机效果
+        const message = document.querySelector('.message');
+        typeWriter(message, "我永远爱你", 200);
+        
+        // 定时切换情话
+        setInterval(() => {
+            const randomMessage = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            typeWriter(message, randomMessage, 100);
+        }, 5000);
         
         // 移除事件监听
         document.removeEventListener('click', startExperience);
@@ -258,9 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 添加许愿功能
     createWishingWell();
     
-    // 创建心跳动画
-    createHeartbeat();
-    
     // 场景管理类
     class SceneManager {
         constructor() {
@@ -299,6 +322,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         typeWriter(message, "我永远爱你", 200);
                     }
                     showPetals();
+                    // 确保心跳动画显示
+                    if (!document.querySelector('.heartbeat')) {
+                        createHeartbeat();
+                    }
                     break;
                 case 1: // 回忆
                     this.initMemoryScene();
@@ -546,8 +573,11 @@ function createStars(element) {
     }
 }
 
-// 添加心跳动画函数
+// 修改心跳动画函数
 function createHeartbeat() {
+    // 移除现有的心跳
+    document.querySelectorAll('.heartbeat').forEach(heart => heart.remove());
+    
     const positions = [
         { left: '10%', top: '20%' },
         { left: '85%', top: '15%' },
@@ -569,9 +599,7 @@ function createHeartbeat() {
         // 添加点击效果
         heart.addEventListener('click', (e) => {
             e.stopPropagation();
-            // 创建爱心爆炸效果
             createHeartBurst(e.clientX, e.clientY);
-            // 播放心跳声音
             playHeartbeatSound();
         });
         
