@@ -42,7 +42,90 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // 统一处理点击/触摸事件
+    // 添加情话数组
+    const loveMessages = [
+        "我最喜欢你了",
+        "你就是我的唯一",
+        "余生请多指教",
+        "我要一直陪在你身边",
+        "你是我最重要的人",
+        "遇见你是我最大的幸福"
+    ];
+    
+    // 添加打字机效果
+    function typeWriter(element, text, speed = 100) {
+        let i = 0;
+        element.innerHTML = '';
+        function type() {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
+        }
+        type();
+    }
+    
+    // 创建可拖动的爱心
+    function createDraggableHeart() {
+        const heart = document.createElement('div');
+        heart.className = 'draggable-heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = Math.random() * 80 + 10 + 'vw';
+        heart.style.top = Math.random() * 80 + 10 + 'vh';
+        
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        
+        heart.addEventListener('mousedown', dragStart);
+        heart.addEventListener('touchstart', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('mouseup', dragEnd);
+        document.addEventListener('touchend', dragEnd);
+        
+        function dragStart(e) {
+            if (e.type === 'mousedown') {
+                initialX = e.clientX - heart.offsetLeft;
+                initialY = e.clientY - heart.offsetTop;
+            } else {
+                initialX = e.touches[0].clientX - heart.offsetLeft;
+                initialY = e.touches[0].clientY - heart.offsetTop;
+            }
+            isDragging = true;
+            heart.style.animation = 'none';
+            heart.style.transform = 'scale(1.2)';
+        }
+        
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            if (e.type === 'mousemove') {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            } else {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            }
+            
+            heart.style.left = currentX + 'px';
+            heart.style.top = currentY + 'px';
+        }
+        
+        function dragEnd() {
+            isDragging = false;
+            heart.style.transform = 'scale(1)';
+            heart.style.animation = 'floating 3s ease-in-out infinite';
+        }
+        
+        document.body.appendChild(heart);
+    }
+    
+    // 修改开始体验函数
     const startExperience = (e) => {
         e.preventDefault();
         document.querySelector('.hint')?.remove();
@@ -74,35 +157,43 @@ document.addEventListener('DOMContentLoaded', () => {
             musicControl.style.animation = 'shake 0.5s ease-in-out';
         });
         
+        // 添加打字机效果
+        const message = document.querySelector('.message');
+        typeWriter(message, "我永远爱你", 200);
+        
+        // 创建多个可拖动的爱心
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => createDraggableHeart(), i * 500);
+        }
+        
+        // 定时切换情话
+        setInterval(() => {
+            const randomMessage = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            typeWriter(message, randomMessage, 100);
+        }, 5000);
+        
         // 移除事件监听
         document.removeEventListener('click', startExperience);
         document.removeEventListener('touchstart', startExperience);
     };
-
+    
     // 添加触摸和点击事件
     document.addEventListener('click', startExperience);
     document.addEventListener('touchstart', startExperience);
     
-    // 处理爱心效果
-    const createHeartAtPoint = (x, y) => {
-        const heart = document.createElement('div');
-        heart.className = 'heart';
-        heart.innerHTML = '❤️'; // 使用emoji替代CSS样式
-        heart.style.left = x + 'px';
-        heart.style.top = y + 'px';
-        document.body.appendChild(heart);
-        setTimeout(() => heart.remove(), 1000);
-    };
-
-    // 同时支持点击和触摸创建爱心
+    // 添加点击特效
     document.addEventListener('click', (e) => {
-        createHeartAtPoint(e.clientX, e.clientY);
-    });
-    
-    document.addEventListener('touchstart', (e) => {
-        Array.from(e.touches).forEach(touch => {
-            createHeartAtPoint(touch.clientX, touch.clientY);
-        });
+        const colors = ['#ff6b6b', '#f06595', '#cc5de8', '#845ef7'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        ripple.style.left = e.clientX + 'px';
+        ripple.style.top = e.clientY + 'px';
+        ripple.style.borderColor = randomColor;
+        document.body.appendChild(ripple);
+        
+        setTimeout(() => ripple.remove(), 1000);
     });
 });
 
