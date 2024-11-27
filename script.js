@@ -310,7 +310,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // ... 其他方法保持不变 ...
+        initMemoryScene() {
+            const timeline = document.querySelector('.photo-timeline');
+            if (!timeline.children.length) {
+                const memories = [
+                    { date: '2024-01-01', text: '我们的初遇', image: 'images/memory1.jpg' },
+                    { date: '2024-02-14', text: '第一个情人节', image: 'images/memory2.jpg' },
+                    // 添加更多回忆...
+                ];
+                
+                memories.forEach(memory => {
+                    const card = document.createElement('div');
+                    card.className = 'memory-card';
+                    card.innerHTML = `
+                        <div class="memory-image">
+                            <img src="${memory.image}" alt="${memory.text}" 
+                                 onerror="this.src='images/default.jpg'">
+                        </div>
+                        <div class="memory-text">
+                            <div class="memory-date">${memory.date}</div>
+                            <div class="memory-description">${memory.text}</div>
+                        </div>
+                    `;
+                    timeline.appendChild(card);
+                });
+            }
+        }
+        
+        initLetterScene() {
+            const content = document.querySelector('.letter-content');
+            if (!content.textContent) {
+                const letter = `亲爱的：
+
+在这特别的时刻，我想对你说一些话。
+
+还记得我们第一次相遇的场景吗？那一刻，我就知道你是我一直在等的人。
+
+和你在一起的每一天都很特别，你的笑容让我的世界充满阳光，你的温柔让我感到无比幸福。
+
+我想要和你一起经历生活中的每一个瞬间，分享每一份快乐，共同面对每一个挑战。
+
+余生很长，请让我一直陪在你身边。
+
+永远爱你的我`;
+                
+                typeWriter(content, letter, 50);
+            }
+        }
+        
+        initInteractiveScene() {
+            const container = document.querySelector('.interactive-container');
+            if (!container.querySelector('.wishing-well')) {
+                createWishingWell();
+            }
+            if (!document.querySelector('.heartbeat')) {
+                createHeartbeat();
+            }
+        }
     }
     
     // 在 DOMContentLoaded 中初始化场景管理器
@@ -421,12 +477,18 @@ function createWishingWell() {
         if (wishInput.value.trim()) {
             const wish = document.createElement('div');
             wish.className = 'wish';
-            wish.innerHTML = `${wishInput.value} <span class="wish-date">${new Date().toLocaleDateString()}</span>`;
+            wish.innerHTML = `
+                <div class="wish-text">${wishInput.value}</div>
+                <span class="wish-date">${new Date().toLocaleDateString()}</span>
+            `;
             wish.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
             wishesContainer.appendChild(wish);
             
             // 创建星星动画
             createStars(wishButton);
+            
+            // 显示祝福消息
+            showWishMessage(wishInput.value);
             
             wishInput.value = '';
             
@@ -441,14 +503,7 @@ function createWishingWell() {
     });
     
     // 加载已保存的愿望
-    const savedWishes = JSON.parse(localStorage.getItem('wishes') || '[]');
-    savedWishes.forEach(savedWish => {
-        const wish = document.createElement('div');
-        wish.className = 'wish';
-        wish.innerHTML = `${savedWish.text} <span class="wish-date">${new Date(savedWish.date).toLocaleDateString()}</span>`;
-        wish.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
-        wishesContainer.appendChild(wish);
-    });
+    loadSavedWishes(wishesContainer);
 }
 
 function createStars(element) {
@@ -555,4 +610,21 @@ function playHeartbeatSound() {
     const heartbeatSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
     heartbeatSound.volume = 0.3;
     heartbeatSound.play().catch(err => console.log('无法播放心跳声音:', err));
+}
+
+// 添加愿望提示效果
+function showWishMessage(wish) {
+    const message = document.createElement('div');
+    message.className = 'wish-message';
+    message.textContent = '愿望已被记录在星空中 ✨';
+    message.style.position = 'fixed';
+    message.style.top = '50%';
+    message.style.left = '50%';
+    message.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => message.remove(), 500);
+    }, 2000);
 } 
