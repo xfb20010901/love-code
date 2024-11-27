@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.loop = true;
     audio.src = 'background-music.mp3';
     document.body.appendChild(audio);
+    
+    // 添加点击爱心效果
+    document.addEventListener('click', (e) => {
+        createHeart(e.clientX, e.clientY);
+    });
 });
 
 document.addEventListener('dblclick', () => {
@@ -20,10 +25,22 @@ document.addEventListener('dblclick', () => {
     document.getElementById('bgMusic').play();
 });
 
+// 添加点击爱心效果函数
+function createHeart(x, y) {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.style.left = x + 'px';
+    heart.style.top = y + 'px';
+    document.body.appendChild(heart);
+    
+    // 动画结束后移除元素
+    setTimeout(() => heart.remove(), 1000);
+}
+
 function showPetals() {
     const petalsContainer = document.getElementById('petals');
     const petalCount = 100;
-    const petalTypes = ['🌸', '🌺', '💮', '🏵️'];
+    const petalTypes = ['🌸', '🌺', '💮', '🏵️', '❤️'];
 
     for (let i = 0; i < petalCount; i++) {
         const petal = document.createElement('div');
@@ -34,5 +51,14 @@ function showPetals() {
         petal.style.fontSize = (Math.random() * 20 + 10) + 'px';
         petal.style.opacity = Math.random() * 0.5 + 0.5;
         petalsContainer.appendChild(petal);
+        
+        // 添加鼠标悬停效果
+        petal.addEventListener('mouseover', () => {
+            petal.style.transform = 'scale(1.5)';
+            petal.style.transition = 'transform 0.3s';
+        });
+        petal.addEventListener('mouseout', () => {
+            petal.style.transform = 'scale(1)';
+        });
     }
 } 
