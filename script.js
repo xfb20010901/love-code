@@ -47,12 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 添加情话数组
     const loveMessages = [
-        "我最喜欢你了",
-        "你就是我的唯一",
-        "余生请多指教",
-        "我要一直陪在你身边",
-        "你是我最重要的人",
-        "遇见你是我最大的幸福"
+        "遇见你是我最大的幸运",
+        "你的笑容是我最爱的风景",
+        "我想牵着你的手，走过春夏秋冬",
+        "你是我最想珍惜的人",
+        "我愿意为你付出所有",
+        "你的快乐就是我的快乐",
+        "我会一直陪在你身边",
+        "你是我生命中最美好的礼物",
+        "我希望未来的每一天都有你",
+        "我爱你胜过爱自己"
     ];
     
     // 添加打字机效果
@@ -215,6 +219,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const petalsContainer = document.createElement('div');
     petalsContainer.id = 'petals';
     document.body.appendChild(petalsContainer);
+    
+    // 在 DOMContentLoaded 事件中添加
+    function addLoveDaysCounter() {
+        const startDate = new Date('2024-01-01'); // 设置你们相识/相爱的开始日期
+        const counter = document.createElement('div');
+        counter.className = 'love-counter';
+        
+        function updateCounter() {
+            const now = new Date();
+            const days = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+            counter.innerHTML = `我们已经相爱 ${days} 天啦 ❤️`;
+        }
+        
+        updateCounter();
+        setInterval(updateCounter, 1000 * 60); // 每分钟更新一次
+        document.body.appendChild(counter);
+    }
+    
+    addLoveDaysCounter();
+    
+    createPhotoWall();
 });
 
 function showPetals() {
@@ -251,4 +276,30 @@ async function playAudio() {
         console.error('音频播放失败:', err);
         musicControl.style.animation = 'shake 0.5s ease-in-out';
     }
+}
+
+function createPhotoWall() {
+    const memories = [
+        { date: '2024-01-01', text: '我们的第一次见面', image: 'path/to/image1.jpg' },
+        { date: '2024-02-14', text: '第一个情人节', image: 'path/to/image2.jpg' },
+        // 添加更多美好回忆
+    ];
+    
+    const wall = document.createElement('div');
+    wall.className = 'photo-wall';
+    
+    memories.forEach(memory => {
+        const card = document.createElement('div');
+        card.className = 'memory-card';
+        card.innerHTML = `
+            <img src="${memory.image}" alt="${memory.text}">
+            <div class="memory-text">
+                <div class="memory-date">${memory.date}</div>
+                <div class="memory-description">${memory.text}</div>
+            </div>
+        `;
+        wall.appendChild(card);
+    });
+    
+    document.body.appendChild(wall);
 } 
