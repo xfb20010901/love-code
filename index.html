@@ -3,14 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>爱的告白</title>
+    <title>爱的表白</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="message">我永远爱你</div>
-        <div id="petals"></div>
+    <div class="scene-container">
+        <!-- 开场页面 -->
+        <div class="scene" id="opening-scene">
+            <div class="container">
+                <div class="message"></div>
+            </div>
+            <div class="scene-nav">点击任意处开始</div>
+        </div>
+        
+        <!-- 回忆页面 -->
+        <div class="scene" id="memory-scene">
+            <div class="memory-title">我们的故事</div>
+            <div class="photo-timeline"></div>
+            <div class="scene-nav">
+                <button class="nav-btn prev-btn">上一页</button>
+                <button class="nav-btn next-btn">下一页</button>
+            </div>
+        </div>
+        
+        <!-- 情书页面 -->
+        <div class="scene" id="letter-scene">
+            <div class="letter-paper">
+                <div class="letter-content"></div>
+            </div>
+            <div class="scene-nav">
+                <button class="nav-btn prev-btn">上一页</button>
+                <button class="nav-btn next-btn">下一页</button>
+            </div>
+        </div>
+        
+        <!-- 互动页面 -->
+        <div class="scene" id="interactive-scene">
+            <div class="interactive-container">
+                <div class="wishing-well"></div>
+                <div class="floating-hearts"></div>
+            </div>
+            <div class="scene-nav">
+                <button class="nav-btn prev-btn">上一页</button>
+                <button class="nav-btn home-btn">回到首页</button>
+            </div>
+        </div>
     </div>
+    <div id="petals"></div>
     <script src="script.js"></script>
 </body>
 </html> 
