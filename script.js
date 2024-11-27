@@ -1,14 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.container').innerHTML += '<div class="hint">点击屏幕开始</div>';
+    
+    // 添加音乐控制按钮
+    const musicControl = document.createElement('div');
+    musicControl.className = 'music-control';
+    musicControl.innerHTML = '🔇';
+    document.body.appendChild(musicControl);
+    
     const audio = document.createElement('audio');
     audio.id = 'bgMusic';
     audio.loop = true;
     audio.src = 'background-music.mp3';
     document.body.appendChild(audio);
     
+    let isMusicPlaying = false;
+    
+    // 音乐控制按钮点击事件
+    musicControl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isMusicPlaying) {
+            audio.pause();
+            musicControl.innerHTML = '🔇';
+        } else {
+            audio.play();
+            musicControl.innerHTML = '🔊';
+        }
+        isMusicPlaying = !isMusicPlaying;
+    });
+    
     // 统一处理点击/触摸事件
     const startExperience = (e) => {
-        e.preventDefault(); // 阻止默认行为
+        e.preventDefault();
         document.querySelector('.hint')?.remove();
         
         // 尝试请求全屏
@@ -30,8 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.message').classList.add('message-animation');
         
         // 尝试播放音乐
-        const music = document.getElementById('bgMusic');
-        music.play().catch(err => console.log('无法自动播放音乐:', err));
+        audio.play().then(() => {
+            isMusicPlaying = true;
+            musicControl.innerHTML = '🔊';
+        }).catch(err => {
+            console.log('需要用户手动点击播放音乐:', err);
+            musicControl.style.animation = 'shake 0.5s ease-in-out';
+        });
         
         // 移除事件监听
         document.removeEventListener('click', startExperience);
