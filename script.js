@@ -15,7 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.id = 'bgMusic';
     audio.loop = true;
     audio.preload = 'auto';
-    audio.src = 'background-music.mp3';
+    audio.innerHTML = `
+        <source src="background-music.mp3" type="audio/mpeg">
+        <source src="background-music.ogg" type="audio/ogg">
+        <source src="background-music.wav" type="audio/wav">
+    `;
     document.body.appendChild(audio);
     
     audio.addEventListener('loadeddata', () => {
@@ -35,15 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         try {
             if (isMusicPlaying) {
-                await audio.pause();
+                audio.pause();
                 musicControl.innerHTML = '🔇';
+                isMusicPlaying = false;
             } else {
                 await playAudio();
             }
-            isMusicPlaying = !isMusicPlaying;
         } catch (err) {
-            console.error('播放失败:', err);
-            alert('音乐播放失败，请检查音频文件');
+            console.error('音乐控制失败:', err);
         }
     });
     
@@ -275,19 +278,21 @@ async function playAudio() {
             return;
         }
         
-        // 检查音频文件是否存在
-        const response = await fetch('background-music.mp3');
-        if (!response.ok) {
-            throw new Error('音频文件不存在');
-        }
-        
-        // 尝试播放
+        // 用户交互后再播放
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-            await playPromise;
-            isMusicPlaying = true;
-            musicControl.innerHTML = '🔊';
-            console.log('音频播放成功');
+            playPromise.then(() => {
+                isMusicPlaying = true;
+                musicControl.innerHTML = '🔊';
+                console.log('音频播放成功');
+            }).catch(error => {
+                console.error('播放失败:', error);
+                // 如果是自动播放策略导致的失败，提示用户点击播放
+                if (error.name === 'NotAllowedError') {
+                    alert('请点击页面任意位置来播放音乐');
+                }
+                throw error;
+            });
         }
         
     } catch (err) {
