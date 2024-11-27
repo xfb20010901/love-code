@@ -45,16 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 添加打字机效果
     function typeWriter(element, text, speed = 100) {
-        let i = 0;
+        if (!element) return;
+        
+        element.style.opacity = '0';
         element.innerHTML = '';
-        function type() {
-            if (i < text.length) {
-                element.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
+        
+        setTimeout(() => {
+            element.style.opacity = '1';
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
             }
-        }
-        type();
+            type();
+        }, 100);
     }
     
     // 创建可拖动的爱心
@@ -120,6 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const startExperience = (e) => {
         e.preventDefault();
         document.querySelector('.hint')?.remove();
+        
+        // 创建主消息
+        const mainMessage = document.querySelector('.main-message');
+        mainMessage.style.opacity = '1';
+        typeWriter(mainMessage, "我永远爱你", 200);
         
         // 尝试请求全屏
         if (!document.fullscreenElement) {
@@ -227,71 +239,57 @@ class SceneManager {
     }
     
     showScene(index) {
-        // 添加过渡动画
-        const currentScene = this.scenes[this.currentScene];
-        const nextScene = this.scenes[index];
+        // 更新主消息
+        const mainMessage = document.querySelector('.main-message');
+        typeWriter(mainMessage, this.messages[index], 200);
         
-        // 淡出当前场景
-        currentScene.style.transition = 'opacity 0.5s ease-out';
-        currentScene.style.opacity = '0';
+        // 场景切换
+        this.scenes.forEach(scene => {
+            scene.classList.remove('active');
+        });
+        this.scenes[index].classList.add('active');
         
-        setTimeout(() => {
-            currentScene.classList.remove('active');
-            nextScene.classList.add('active');
-            
-            // 淡入新场景
-            nextScene.style.transition = 'opacity 0.5s ease-in';
-            nextScene.style.opacity = '1';
-            
-            // 更新导航按钮状态
-            document.querySelectorAll('.scene-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (parseInt(btn.dataset.scene) === index) {
-                    btn.classList.add('active');
+        // 更新导航按钮状态
+        document.querySelectorAll('.scene-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.scene) === index) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // 根据场景执行特定初始化
+        switch(index) {
+            case 0:
+                if (!this.sceneStates.petalsCreated) {
+                    showPetals();
+                    this.sceneStates.petalsCreated = true;
                 }
-            });
-            
-            // 显示场景对应的消息
-            const message = nextScene.querySelector('.message');
-            if (message) {
-                message.style.opacity = '1';
-                typeWriter(message, this.messages[index], 200);
-            }
-            
-            // 根据场景执行特定初始化
-            switch(index) {
-                case 0:
-                    if (!this.sceneStates.petalsCreated) {
-                        showPetals();
-                        this.sceneStates.petalsCreated = true;
-                    }
-                    if (!this.sceneStates.heartbeatsCreated) {
-                        createHeartbeat();
-                        this.sceneStates.heartbeatsCreated = true;
-                    }
-                    break;
-                case 1:
-                    if (!this.sceneStates.memoryInitialized) {
-                        this.initMemoryScene();
-                        this.sceneStates.memoryInitialized = true;
-                    }
-                    break;
-                case 2:
-                    if (!this.sceneStates.letterInitialized) {
-                        this.initLetterScene();
-                        this.sceneStates.letterInitialized = true;
-                    }
-                    break;
-                case 3:
-                    if (!this.sceneStates.wishingWellCreated) {
-                        createWishingWell();
-                        this.sceneStates.wishingWellCreated = true;
-                    }
-                    break;
-            }
-            
-            this.currentScene = index;
-        }, 500);
+                if (!this.sceneStates.heartbeatsCreated) {
+                    createHeartbeat();
+                    this.sceneStates.heartbeatsCreated = true;
+                }
+                break;
+            case 1:
+                if (!this.sceneStates.memoryInitialized) {
+                    this.initMemoryScene();
+                    this.sceneStates.memoryInitialized = true;
+                }
+                break;
+            case 2:
+                if (!this.sceneStates.letterInitialized) {
+                    this.initLetterScene();
+                    this.sceneStates.letterInitialized = true;
+                }
+                break;
+            case 3:
+                if (!this.sceneStates.wishingWellCreated) {
+                    createWishingWell();
+                    this.sceneStates.wishingWellCreated = true;
+                }
+                break;
+        }
+        
+        this.currentScene = index;
     }
     
     cleanupCurrentScene() {
