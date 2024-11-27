@@ -171,28 +171,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
+        showPetals();
+        document.querySelector('.message').style.opacity = '1';
+        document.querySelector('.message').classList.add('message-animation');
+        
         // 初始化场景
         const sceneManager = new SceneManager();
-        sceneManager.showScene(0); // 显示开场场景
         
         // 添加场景切换按钮
         const navContainer = document.createElement('div');
         navContainer.className = 'global-nav';
         navContainer.innerHTML = `
-            <button class="nav-btn scene-btn" data-scene="0">开场</button>
+            <button class="nav-btn scene-btn" data-scene="0">首页</button>
             <button class="nav-btn scene-btn" data-scene="1">回忆</button>
             <button class="nav-btn scene-btn" data-scene="2">情书</button>
             <button class="nav-btn scene-btn" data-scene="3">互动</button>
         `;
         document.body.appendChild(navContainer);
         
-        // 绑定场景切换按钮事件
-        document.querySelectorAll('.scene-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const sceneIndex = parseInt(e.target.dataset.scene);
-                sceneManager.showScene(sceneIndex);
-            });
-        });
+        // 显示第一个场景
+        sceneManager.showScene(0);
         
         // 移除事件监听
         document.removeEventListener('click', startExperience);
@@ -295,8 +293,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // 根据场景执行特定初始化
             switch(index) {
                 case 0: // 开场
+                    const message = document.querySelector('.message');
+                    if (message) {
+                        message.style.opacity = '1';
+                        typeWriter(message, "我永远爱你", 200);
+                    }
                     showPetals();
-                    typeWriter(document.querySelector('.message'), "我永远爱你", 200);
                     break;
                 case 1: // 回忆
                     this.initMemoryScene();
@@ -307,6 +309,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 3: // 互动
                     this.initInteractiveScene();
                     break;
+            }
+            
+            // 更新导航按钮显示
+            this.updateNavigation();
+        }
+        
+        updateNavigation() {
+            // 移除所有现有的场景导航
+            document.querySelectorAll('.scene-nav').forEach(nav => {
+                nav.style.display = 'none';
+            });
+            
+            // 显示当前场景的导航
+            const currentSceneNav = this.scenes[this.currentScene].querySelector('.scene-nav');
+            if (currentSceneNav) {
+                currentSceneNav.style.display = 'flex';
             }
         }
         
