@@ -1,13 +1,17 @@
+let audio;
+let musicControl;
+let isMusicPlaying = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.container').innerHTML += '<div class="hint">点击屏幕开始</div>';
     
-    // 添加音乐控制按钮
-    const musicControl = document.createElement('div');
+    // 初始化音频和控制按钮
+    musicControl = document.createElement('div');
     musicControl.className = 'music-control';
     musicControl.innerHTML = '🔇';
     document.body.appendChild(musicControl);
     
-    const audio = document.createElement('audio');
+    audio = document.createElement('audio');
     audio.id = 'bgMusic';
     audio.loop = true;
     audio.preload = 'auto';
@@ -25,8 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     audio.addEventListener('canplaythrough', () => {
         console.log('音频已缓冲完成，可以播放');
     });
-    
-    let isMusicPlaying = false;
     
     // 音乐控制按钮点击事件
     musicControl.addEventListener('click', async (e) => {
@@ -268,18 +270,39 @@ function showPetals() {
 
 async function playAudio() {
     try {
+        if (!audio || !musicControl) {
+            console.error('Audio elements not initialized');
+            return;
+        }
+        
         if (!audio.readyState >= 2) {
             await new Promise((resolve, reject) => {
                 audio.addEventListener('canplaythrough', resolve, {once: true});
                 audio.addEventListener('error', reject, {once: true});
+                
+                // 添加超时处理
+                setTimeout(() => {
+                    reject(new Error('Audio loading timeout'));
+                }, 5000);
             });
         }
+        
         await audio.play();
         isMusicPlaying = true;
         musicControl.innerHTML = '🔊';
+        
+        // 添加音频状态日志
+        console.log('Audio playing successfully');
+        console.log('Audio current time:', audio.currentTime);
+        console.log('Audio duration:', audio.duration);
+        console.log('Audio ready state:', audio.readyState);
+        
     } catch (err) {
         console.error('音频播放失败:', err);
-        musicControl.style.animation = 'shake 0.5s ease-in-out';
+        if (musicControl) {
+            musicControl.style.animation = 'shake 0.5s ease-in-out';
+        }
+        throw err; // 重新抛出错误以便调用者处理
     }
 }
 
