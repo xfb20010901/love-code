@@ -14,6 +14,9 @@ body {
     position: relative;
     z-index: 1;
     animation: fadeIn 2s ease-in;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .message {
@@ -24,6 +27,10 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     transform-style: preserve-3d;
     perspective: 1000px;
+    width: 100%;
+    max-width: 90vw;
+    margin: 0 auto;
+    word-break: break-word;
 }
 
 .message-animation {
@@ -49,6 +56,10 @@ body {
     color: white;
     font-size: 1.2em;
     animation: fadeInOut 2s infinite;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    bottom: 50px;
 }
 
 @keyframes fadeInOut {
@@ -64,6 +75,7 @@ body {
     transition: transform 0.3s;
     cursor: pointer;
     will-change: transform;
+    pointer-events: none;
 }
 
 @keyframes falling {
@@ -77,20 +89,21 @@ body {
 
 .heart {
     position: fixed;
-    font-size: 20px;
+    font-size: 30px;
     animation: heartAnim 1s ease-out;
     z-index: 999;
     user-select: none;
     pointer-events: none;
+    transform-origin: center center;
 }
 
 @keyframes heartAnim {
     0% {
-        transform: scale(0);
+        transform: scale(0) translate(-50%, -50%);
         opacity: 1;
     }
     100% {
-        transform: scale(2);
+        transform: scale(2) translate(-25%, -25%);
         opacity: 0;
     }
 }
@@ -112,5 +125,24 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@media (hover: none) {
+    .petal {
+        pointer-events: none;
+    }
+    
+    .message {
+        font-size: 2em;
+        padding: 20px;
+    }
+    
+    .hint {
+        font-size: 1.2em;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        bottom: 50px;
+    }
 }
 </file>
