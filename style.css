@@ -611,11 +611,10 @@ body {
 /* 全局导航样式 */
 .global-nav {
     position: fixed;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    flex-direction: column;
     gap: 10px;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.1);
@@ -649,17 +648,17 @@ body {
 /* 移动端适配 */
 @media (max-width: 768px) {
     .global-nav {
-        top: auto;
-        bottom: 20px;
-        right: 50%;
-        transform: translateX(50%);
-        flex-direction: row;
         padding: 8px;
     }
     
     .scene-btn {
         padding: 8px 15px;
         font-size: 0.9em;
+    }
+    
+    .message {
+        font-size: 1.5em;
+        padding: 0 20px;
     }
 }
 
