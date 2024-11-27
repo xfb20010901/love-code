@@ -266,6 +266,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.addEventListener('click', handleFirstInteraction);
     document.addEventListener('touchstart', handleFirstInteraction);
+    
+    // 添加许愿功能
+    createWishingWell();
+    
+    // 创建心跳动画
+    createHeartbeat();
 });
 
 function showPetals() {
@@ -347,4 +353,163 @@ function createPhotoWall() {
     
     document.body.appendChild(wall);
     console.log('Photo wall created');
+}
+
+// 添加许愿功能
+function createWishingWell() {
+    const wishingWell = document.createElement('div');
+    wishingWell.className = 'wishing-well';
+    wishingWell.innerHTML = `
+        <div class="well-title">💝 许下你的愿望</div>
+        <div class="wish-input-container">
+            <input type="text" class="wish-input" placeholder="写下你的愿望...">
+            <button class="wish-button">💫</button>
+        </div>
+        <div class="wishes-container"></div>
+    `;
+    
+    document.body.appendChild(wishingWell);
+    
+    const wishInput = wishingWell.querySelector('.wish-input');
+    const wishButton = wishingWell.querySelector('.wish-button');
+    const wishesContainer = wishingWell.querySelector('.wishes-container');
+    
+    wishButton.addEventListener('click', () => {
+        if (wishInput.value.trim()) {
+            const wish = document.createElement('div');
+            wish.className = 'wish';
+            wish.innerHTML = `${wishInput.value} <span class="wish-date">${new Date().toLocaleDateString()}</span>`;
+            wish.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+            wishesContainer.appendChild(wish);
+            
+            // 创建星星动画
+            createStars(wishButton);
+            
+            wishInput.value = '';
+            
+            // 保存愿望到localStorage
+            const wishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+            wishes.push({
+                text: wish.textContent,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('wishes', JSON.stringify(wishes));
+        }
+    });
+    
+    // 加载已保存的愿望
+    const savedWishes = JSON.parse(localStorage.getItem('wishes') || '[]');
+    savedWishes.forEach(savedWish => {
+        const wish = document.createElement('div');
+        wish.className = 'wish';
+        wish.innerHTML = `${savedWish.text} <span class="wish-date">${new Date(savedWish.date).toLocaleDateString()}</span>`;
+        wish.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+        wishesContainer.appendChild(wish);
+    });
+}
+
+function createStars(element) {
+    const starCount = 5;
+    const starTypes = ['⭐', '✨', '💫'];
+    
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = starTypes[Math.floor(Math.random() * starTypes.length)];
+        
+        const rect = element.getBoundingClientRect();
+        star.style.left = rect.left + rect.width/2 + 'px';
+        star.style.top = rect.top + rect.height/2 + 'px';
+        
+        const angle = (i / starCount) * Math.PI * 2;
+        const distance = 50;
+        star.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+        
+        document.body.appendChild(star);
+        setTimeout(() => star.remove(), 1000);
+    }
+}
+
+// 添加心跳动画函数
+function createHeartbeat() {
+    const positions = [
+        { left: '10%', top: '20%' },
+        { left: '85%', top: '15%' },
+        { left: '75%', top: '75%' },
+        { left: '15%', top: '80%' }
+    ];
+    
+    positions.forEach(pos => {
+        const heart = document.createElement('div');
+        heart.className = 'heartbeat';
+        heart.style.left = pos.left;
+        heart.style.top = pos.top;
+        
+        // 添加脉冲环效果
+        const pulseRing = document.createElement('div');
+        pulseRing.className = 'pulse-ring';
+        heart.appendChild(pulseRing);
+        
+        // 添加点击效果
+        heart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // 创建爱心爆炸效果
+            createHeartBurst(e.clientX, e.clientY);
+            // 播放心跳声音
+            playHeartbeatSound();
+        });
+        
+        document.body.appendChild(heart);
+    });
+}
+
+// 添加爱心爆炸效果
+function createHeartBurst(x, y) {
+    const burstCount = 10;
+    const colors = ['#ff6b6b', '#f06595', '#cc5de8'];
+    
+    for (let i = 0; i < burstCount; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤️';
+        heart.style.position = 'fixed';
+        heart.style.left = x + 'px';
+        heart.style.top = y + 'px';
+        heart.style.fontSize = '20px';
+        heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+        heart.style.pointerEvents = 'none';
+        
+        const angle = (i / burstCount) * Math.PI * 2;
+        const velocity = 10;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity;
+        
+        document.body.appendChild(heart);
+        
+        let frame = 0;
+        const animate = () => {
+            frame++;
+            const x = parseFloat(heart.style.left) + vx;
+            const y = parseFloat(heart.style.top) + vy + frame * 0.5; // 添加重力效果
+            const opacity = 1 - frame / 50;
+            
+            heart.style.left = x + 'px';
+            heart.style.top = y + 'px';
+            heart.style.opacity = opacity;
+            
+            if (opacity > 0) {
+                requestAnimationFrame(animate);
+            } else {
+                heart.remove();
+            }
+        };
+        
+        requestAnimationFrame(animate);
+    }
+}
+
+// 添加心跳声音效果
+function playHeartbeatSound() {
+    const heartbeatSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+    heartbeatSound.volume = 0.3;
+    heartbeatSound.play().catch(err => console.log('无法播放心跳声音:', err));
 } 
